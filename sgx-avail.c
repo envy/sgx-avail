@@ -237,6 +237,7 @@ void sgx_info()
 {
     printf("=====\nSGX information\n-----\n");
     unsigned int eax, ebx, ecx, edx;
+    unsigned int epc = 2;
 
     // Check general SGX availability
     // Bit 2 of EBX informs of SGX availability.
@@ -310,55 +311,47 @@ void sgx_info()
     printbin(secs_attr_d->secs_attr);
     printf("\n\n");
 
-
-    cpuid(0x12, 0x02, &eax, &ebx, &ecx, &edx);
-    sgx_cap_12_2__eax_t *epc_info = (sgx_cap_12_2__eax_t *) &eax;
-    sgx_cap_12_2__ebx_t *epc_info_b = (sgx_cap_12_2__ebx_t *) &ebx;
-    printf("EPC information available: ");
-    if (!epc_info->epc_info_avail)
+    while(1)
     {
-        printf("%sNO%s\n", RED, NORMAL);
-        return;
-    }
-    printf("%sYES%s\n", GREEN, NORMAL);
+        printf("EPC region %u\n", epc - 1);
+        cpuid(0x12, epc, &eax, &ebx, &ecx, &edx);
+        sgx_cap_12_2__eax_t *epc_info = (sgx_cap_12_2__eax_t *) &eax;
+        sgx_cap_12_2__ebx_t *epc_info_b = (sgx_cap_12_2__ebx_t *) &ebx;
+        printf("EPC information available: ");
+        if (!epc_info->epc_info_avail)
+        {
+            printf("%sNO%s\n", RED, NORMAL);
+            return;
+        }
+        printf("%sYES%s\n", GREEN, NORMAL);
 
-    __uint64_t epc_base = 0;
-    for (int i = 12; i < 32; i++)
-    {
-        if ((epc_info->epc_phys_base_bits_12_to_31 >> (i - 12)) & 1)
-            epc_base |= 1 << i;
-    }
-    for (int i = 32;i < 51; i++)
-    {
-        if ((epc_info_b->epc_phys_base_bits_31_to_51 >> (i - 32)) & 1)
-            epc_base |= 1 << i;
-    }
+        __uint64_t epc_base = 0;
+        epc_base |= ((uint64_t)epc_info->epc_phys_base_bits_12_to_31 << 0x0c) & 0x00000000ffffffff;
+        epc_base |= ((uint64_t)epc_info_b->epc_phys_base_bits_31_to_51 << 0x20) & 0xffffffff00000000;
+        printf("Physical EPC base address: %lx\n", epc_base);
 
-    printf("Physical EPC base address: %lx\n", epc_base);
+        sgx_cap_12_2__ecx_t *epc_sec_info = (sgx_cap_12_2__ecx_t *) &ecx;
+        sgx_cap_12_2__edx_t *epc_sec_info_b = (sgx_cap_12_2__edx_t *) &edx;
 
-    sgx_cap_12_2__ecx_t *epc_sec_info = (sgx_cap_12_2__ecx_t *) &ecx;
-    sgx_cap_12_2__edx_t *epc_sec_info_b = (sgx_cap_12_2__edx_t *) &edx;
+        printf("EPC is confidentiality, integrity and replay protected: ");
+        if (!epc_sec_info->epc_sec_avail)
+        {
+            printf("%sNO%s\n", RED, NORMAL);
+            return;
+        }
+        printf("%sYES%s\n", GREEN, NORMAL);
 
-    printf("EPC is confidentiality, integrity and replay protected: ");
-    if (!epc_sec_info->epc_sec_avail)
-    {
-        printf("%sNO%s\n", RED, NORMAL);
-        return;
-    }
-    printf("%sYES%s\n", GREEN, NORMAL);
+        __uint64_t epc_prm_size = 0;
+        epc_prm_size |= ((uint64_t)epc_sec_info->epc_prm_size_bits_12_to_31 << 0x0c) & 0x00000000ffffffff;
+        epc_prm_size |= ((uint64_t)epc_sec_info_b->epc_prm_size_bits_31_to_51 << 0x20) & 0xffffffff00000000;
+        printf("Size of EPC inside Processor Reserved Memory: %lu B (%lu MiB)\n", epc_prm_size, epc_prm_size / 1024 / 1024);
 
-    __uint64_t epc_prm_size = 0;
-    for (int i = 12; i < 32; i++)
-    {
-        if ((epc_sec_info->epc_prm_size_bits_12_to_31 >> (i - 12)) & 1)
-            epc_prm_size |= 1 << i;
+        // Check next region
+        cpuid(0x12, epc + 1, &eax, &ebx, &ecx, &edx);
+        epc_info = (sgx_cap_12_2__eax_t *) &eax;
+        if (!epc_info->epc_info_avail)
+            break;
     }
-    for (int i = 32;i < 51; i++)
-    {
-        if ((epc_sec_info_b->epc_prm_size_bits_31_to_51 >> (i - 32)) & 1)
-            epc_prm_size |= 1 << i;
-    }
-    printf("Size of EPC inside Processor Reserved Memory: %lu B (%lu MiB)\n", epc_prm_size, epc_prm_size / 1024 / 1024);
 }
 
 int main()
