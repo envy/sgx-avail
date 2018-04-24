@@ -81,7 +81,10 @@ typedef struct
 {
     int sgxv1:1;
     int sgxv2:1;
-    int reserved:30;
+    int reserved1:3;
+    int oversub1:1;
+    int oversub2:1;
+    int reserverd2:25;
 } sgx_cap_12_0__eax_t;
 
 typedef struct
@@ -278,6 +281,26 @@ void sgx_info()
         return;
     }
 
+    printf("Virtualization Extension 1 (EINCVIRTCHILD, EDECVIRTCHILD, ESETCONTEXT): ");
+    if (sgx_version->oversub1)
+    {
+        printf("%sSUPPORTED%s\n", GREEN, NORMAL);
+    }
+    else
+    {
+        printf("%sUNSUPPORTED%s\n", RED, NORMAL);
+    }
+
+    printf("Virtualization Extension 2 (ETRACKC, ERDINFO, ELDBC, ELDUC): ");
+    if (sgx_version->oversub2)
+    {
+        printf("%sSUPPORTED%s\n", GREEN, NORMAL);
+    }
+    else
+    {
+        printf("%sUNSUPPORTED%s\n", RED, NORMAL);
+    }
+
     printf("\n");
 
     sgx_cap_12_0__ebx_t *miscselect = (sgx_cap_12_0__ebx_t *) &ebx;
@@ -328,7 +351,7 @@ void sgx_info()
         __uint64_t epc_base = 0;
         epc_base |= ((uint64_t)epc_info->epc_phys_base_bits_12_to_31 << 0x0c) & 0x00000000ffffffff;
         epc_base |= ((uint64_t)epc_info_b->epc_phys_base_bits_31_to_51 << 0x20) & 0xffffffff00000000;
-        printf("Physical EPC base address: %lx\n", epc_base);
+        printf("Physical EPC base address: 0x%lx\n", epc_base);
 
         sgx_cap_12_2__ecx_t *epc_sec_info = (sgx_cap_12_2__ecx_t *) &ecx;
         sgx_cap_12_2__edx_t *epc_sec_info_b = (sgx_cap_12_2__edx_t *) &edx;
