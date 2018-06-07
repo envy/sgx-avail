@@ -236,6 +236,30 @@ void printbin(int n)
     }
 }
 
+#define CHECK_BIT(var,pos) ((var) & (1<<(pos)))
+
+void decode_misselect(uint32_t v)
+{
+    printbin(v);
+    printf("\n");
+    printf("|                               \n");
+    printf("`--------------------------------- %sEXINFO%s\n", CHECK_BIT(v, 0) ? GREEN : RED, NORMAL);
+    printf("\n");
+}
+
+void decode_secs_a(uint32_t v)
+{
+    printbin(v);
+    printf("\n");
+    printf("||| || |                        \n");
+    printf("`--------------------------------- %sINIT%s\n", CHECK_BIT(v, 0) ? GREEN : RED, NORMAL);
+    printf(" `-------------------------------- %sDEBUG%s\n", CHECK_BIT(v, 1) ? GREEN : RED, NORMAL);
+    printf("  `------------------------------- %sMODE64BIT%s\n", CHECK_BIT(v, 2) ? GREEN : RED, NORMAL);
+    printf("    `----------------------------- %sPROVISIONKEY%s\n", CHECK_BIT(v, 4) ? GREEN : RED, NORMAL);
+    printf("     `---------------------------- %sEINITTOKEN_KEY%s\n", CHECK_BIT(v, 5) ? GREEN : RED, NORMAL);
+    printf("       `-------------------------- %sKSS%s\n", CHECK_BIT(v, 7) ? GREEN : RED, NORMAL);
+}
+
 void sgx_info()
 {
     printf("=====\nSGX information\n-----\n");
@@ -310,8 +334,7 @@ void sgx_info()
 
     sgx_cap_12_0__ebx_t *miscselect = (sgx_cap_12_0__ebx_t *) &ebx;
     printf("MISCSELECT bit vector for extended features; written to SSA MISC region: \n");
-    printbin(miscselect->miscselect);
-    printf("\n\n");
+    decode_misselect(miscselect->miscselect);
 
     sgx_cap_12_0__edx_t *enc_info = (sgx_cap_12_0__edx_t *) &edx;
     unsigned char enc_size_32 = (unsigned char) enc_info->max_enclave_size_32;
@@ -330,8 +353,7 @@ void sgx_info()
     sgx_cap_12_1__edx_t *secs_attr_d = (sgx_cap_12_1__edx_t *)&edx;
 
     printf("Supported SECS attributes for ECREATE:\n");
-    printbin(secs_attr_a->secs_attr);
-    printf("\n");
+    decode_secs_a(secs_attr_a->secs_attr);
     printbin(secs_attr_b->secs_attr);
     printf("\n");
     printbin(secs_attr_c->secs_attr);
