@@ -1,0 +1,35 @@
+SGX availability checker
+=====
+General CPU information
+-----
+Intel(R) Xeon(R) Platinum 8124M CPU @ 3.00GHz
+Vendor: GenuineIntel
+CPUID level: 13 (0xd)
+Stepping: 3 (0x3)
+Family: 6 (0x6)
+Model: 85 (0x55)
+Type: 0 (0x0)
+
+=====
+SGX information
+-----
+SGX available: NO
+SGX version support: v1 + v2
+Virtualization Extension 1 (EINCVIRTCHILD, EDECVIRTCHILD, ESETCONTEXT): SUPPORTED
+Virtualization Extension 2 (ETRACKC, ERDINFO, ELDBC, ELDUC): SUPPORTED
+
+MISCSELECT bit vector for extended features; written to SSA MISC region: 
+00000001010100000000000000000000
+
+Max enclave size in non-64bit mode: 2^0 byte (1 byte, 0 MiB, 0 GiB) 
+Max enclave size in     64bit mode: 2^0 byte (1 byte, 0 MiB, 0 GiB) 
+
+Supported SECS attributes for ECREATE:
+11110000000000000000000000000000
+00000000010100000000000000000000
+00000000000000000000000000000000
+00000000000000000000000000000000
+
+EPC region 1
+EPC information available: NO
+
