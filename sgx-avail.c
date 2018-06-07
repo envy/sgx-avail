@@ -253,10 +253,11 @@ void sgx_info()
     if (!sgx_avail->sgx)
     {
         printf("%sNO%s\n", RED, NORMAL);
-        return;
     }
-
-    printf("%sYES%s\n", GREEN, NORMAL);
+    else
+    {
+        printf("%sYES%s\n", GREEN, NORMAL);
+    }
 
     // Check which SGX version is supported
     cpuid(0x12, 0x00, &eax, &ebx, &ecx, &edx);
@@ -273,12 +274,16 @@ void sgx_info()
     }
     else if (!sgx_version->sgxv1 && sgx_version->sgxv2)
     {
-        printf("%sv2 (and only 2, CPU does not report support for v1 which is weird)%s\n", YELLOW, NORMAL);
+        printf("%sv2 (and only v2, CPU does not report support for v1 which is weird)%s\n", YELLOW, NORMAL);
     }
-    else if (!sgx_version->sgxv1 && !sgx_version->sgxv2)
+
+    if (!sgx_version->sgxv1 && !sgx_version->sgxv2 && sgx_avail->sgx)
     {
-        printf("%sNONE%s\nSomething is wrong, CPU indicates SGX availability but reports neither SGX v1 or SGX v2 compatibility!\n", RED, NORMAL);
-        return;
+        printf("%sNONE%s\nCPU indicates SGX availability but reports neither SGX v1 or SGX v2 compatibility. Could be disabled in BIOS/EFI.\n", RED, NORMAL);
+    }
+    else if (!sgx_version->sgxv1 && !sgx_version->sgxv2 && !sgx_avail->sgx)
+    {
+        printf("%sNONE%s\n", RED, NORMAL);
     }
 
     printf("Virtualization Extension 1 (EINCVIRTCHILD, EDECVIRTCHILD, ESETCONTEXT): ");
@@ -344,7 +349,7 @@ void sgx_info()
         if (!epc_info->epc_info_avail)
         {
             printf("%sNO%s\n", RED, NORMAL);
-            return;
+            break;
         }
         printf("%sYES%s\n", GREEN, NORMAL);
 
@@ -360,9 +365,11 @@ void sgx_info()
         if (!epc_sec_info->epc_sec_avail)
         {
             printf("%sNO%s\n", RED, NORMAL);
-            return;
         }
-        printf("%sYES%s\n", GREEN, NORMAL);
+        else
+        {
+            printf("%sYES%s\n", GREEN, NORMAL);
+        }
 
         __uint64_t epc_prm_size = 0;
         epc_prm_size |= ((uint64_t)epc_sec_info->epc_prm_size_bits_12_to_31 << 0x0c) & 0x00000000ffffffff;
@@ -374,6 +381,7 @@ void sgx_info()
         epc_info = (sgx_cap_12_2__eax_t *) &eax;
         if (!epc_info->epc_info_avail)
             break;
+        epc++;
     }
 }
 
