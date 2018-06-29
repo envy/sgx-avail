@@ -1,0 +1,46 @@
+SGX availability checker
+=====
+General CPU information
+-----
+Intel(R) Celeron(R) J4005 CPU @ 2.00GHz
+Vendor: GenuineIntel
+CPUID level: 24 (0x18)
+Stepping: 1 (0x1)
+Family: 6 (0x6)
+Model: 122 (0x7a)
+Type: 0 (0x0)
+
+=====
+SGX information
+-----
+SGX available: YES
+SGX version support: v1 + v2
+Virtualization Extension 1 (EINCVIRTCHILD, EDECVIRTCHILD, ESETCONTEXT): UNSUPPORTED
+Virtualization Extension 2 (ETRACKC, ERDINFO, ELDBC, ELDUC): UNSUPPORTED
+
+MISCSELECT bit vector for extended features; written to SSA MISC region: 
+10000000000000000000000000000000
+|                               
+`--------------------------------- EXINFO
+
+Max enclave size in non-64bit mode: 2^31 byte (2147483648 byte, 2048 MiB, 2 GiB) 
+Max enclave size in     64bit mode: 2^36 byte (68719476736 byte, 65536 MiB, 64 GiB) 
+
+Supported SECS attributes for ECREATE:
+01101100000000000000000000000000
+||| || |                        
+`--------------------------------- INIT
+ `-------------------------------- DEBUG
+  `------------------------------- MODE64BIT
+    `----------------------------- PROVISIONKEY
+     `---------------------------- EINITTOKEN_KEY
+       `-------------------------- KSS
+00000000000000000000000000000000
+11011000000000000000000000000000
+00000000000000000000000000000000
+
+EPC region 1
+EPC information available: YES
+Physical EPC base address: 0x70200000
+EPC is confidentiality, integrity and replay protected: YES
+Size of EPC inside Processor Reserved Memory: 98566144 B (94 MiB)
